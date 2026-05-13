@@ -132,6 +132,20 @@ rl_autograding_prototype/
 
 ---
 
+## Publishing to GitHub
+
+This repo was initialized with `git` locally. If `gh` CLI is unavailable, create an empty repository named **`rl-grading-adjustment-prototype`** on GitHub, then:
+
+```bash
+cd rl_autograding_prototype
+git remote add origin https://github.com/<YOUR_USER>/rl-grading-adjustment-prototype.git
+git push -u origin main
+```
+
+Use SSH remotes if you prefer (`git@github.com:...`).
+
+---
+
 ## License
 
 Prototype / educational use. Add a license file if you redistribute beyond research.
