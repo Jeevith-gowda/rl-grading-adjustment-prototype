@@ -138,11 +138,11 @@ This repo was initialized with `git` locally. If `gh` CLI is unavailable, create
 
 ```bash
 cd rl_autograding_prototype
-git remote add origin https://github.com/<YOUR_USER>/rl-grading-adjustment-prototype.git
+git remote add origin https://github.com/Jeevith-gowda/rl-grading-adjustment-prototype.git
 git push -u origin main
 ```
 
-Use SSH remotes if you prefer (`git@github.com:...`).
+Use SSH if you prefer: `git@github.com:Jeevith-gowda/rl-grading-adjustment-prototype.git`
 
 ---
 
