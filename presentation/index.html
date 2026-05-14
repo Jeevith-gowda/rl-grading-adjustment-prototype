@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RL Grading Adjustment Prototype</title>
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --bg-elevated: #ffffff;
+      --text: #1a1a1a;
+      --text-muted: #5c5c5c;
+      --accent: #0d9488;
+      --accent-soft: rgba(13, 148, 136, 0.12);
+      --accent-blue: #2563eb;
+      --border: #e8e6e3;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
+      --radius: 14px;
+      --maxw: 720px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .section { animation: none !important; opacity: 1 !important; transform: none !important; }
+    }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 1.05rem;
+    }
+    /* Scroll-driven section reveal (Chrome 115+); graceful fallback */
+    .section {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      opacity: 1;
+      transform: none;
+    }
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .section {
+          opacity: 0;
+          transform: translateY(16px);
+          animation: section-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          animation-timeline: view();
+          animation-range: entry 0% cover 28%;
+        }
+      }
+    }
+    @keyframes section-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero {
+      min-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 3rem 1.5rem 4rem;
+      background: linear-gradient(165deg, #fffef9 0%, #f0fdfa 45%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      font-size: clamp(1.85rem, 5vw, 2.65rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin: 0 0 0.75rem;
+      max-width: 18ch;
+    }
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 36ch;
+      margin: 0 0 1.5rem;
+    }
+    .hero-meta {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      margin: 0 0 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent);
+      display: inline-block;
+    }
+    .card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.35rem;
+      box-shadow: var(--shadow);
+      margin-top: 1rem;
+    }
+    ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+    li { margin: 0.45rem 0; }
+    p { margin: 0.75rem 0 0; color: var(--text-muted); }
+    p.lead { color: var(--text); font-size: 1.05rem; }
+    .bar-chart {
+      margin-top: 1.5rem;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+    .bar-label {
+      flex: 0 0 140px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text);
+      text-align: right;
+    }
+    @media (max-width: 520px) {
+      .bar-label { flex: 0 0 100px; font-size: 0.78rem; }
+    }
+    .bar-track {
+      flex: 1;
+      height: 36px;
+      background: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      min-width: 2.5rem;
+      transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .bar-fill.ppo {
+      width: 81.8%;
+      background: linear-gradient(90deg, var(--accent), #14b8a6);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+    }
+    .bar-fill.reg { width: 71.5%; background: #64748b; }
+    .bar-fill.p2 { width: 27%; background: #94a3b8; }
+    .bar-fill.trust { width: 14.4%; background: #cbd5e1; color: #334155; }
+    .bar-note {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      background: var(--accent-soft);
+      border-radius: 10px;
+      border-left: 4px solid var(--accent);
+    }
+    table.confusion {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 1rem;
+    }
+    table.confusion th, table.confusion td {
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.45rem;
+      text-align: center;
+    }
+    table.confusion th {
+      background: #f4f4f2;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    table.confusion td:first-child {
+      font-weight: 600;
+      background: #fafafa;
+      text-align: left;
+      padding-left: 0.65rem;
+    }
+    table.confusion .diag {
+      background: rgba(16, 185, 129, 0.28) !important;
+      font-weight: 700;
+    }
+    table.confusion .sum {
+      background: #f0fdf4;
+      font-weight: 600;
+    }
+    .caption {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      font-style: italic;
+    }
+    .callout {
+      background: linear-gradient(135deg, #ecfdf5 0%, #fff 50%);
+      border: 1px solid rgba(13, 148, 136, 0.35);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      margin-top: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .callout strong { color: var(--accent); font-size: 1.15rem; display: block; margin-bottom: 0.5rem; }
+    .q-chart { margin-top: 1.25rem; }
+    .q-row {
+      display: grid;
+      grid-template-columns: minmax(100px, 1fr) 4fr auto;
+      gap: 0.5rem 0.75rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+    }
+    .q-row span:first-child { color: var(--text-muted); }
+    .q-bar {
+      height: 10px;
+      background: #e5e5e5;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .q-bar > i {
+      display: block;
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--accent-blue), #60a5fa);
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: #f4f4f2;
+      border-top: 1px solid var(--border);
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+    footer a { color: var(--accent-blue); text-decoration: none; font-weight: 500; }
+    footer a:hover { text-decoration: underline; }
+    .icon { vertical-align: middle; margin-right: 0.25rem; }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-badge">
+      <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Prototype
+    </div>
+    <h1>RL Grading Adjustment Prototype</h1>
+    <p class="hero-sub">Predicting TA grade adjustments on AI-graded student submissions</p>
+    <p class="hero-meta">Built in 2 days on Professor Cheng&rsquo;s autograding dataset</p>
+  </header>
+
+  <section class="section" id="problem">
+    <h2>The problem</h2>
+    <div class="card">
+      <p class="lead">Professor Cheng has an AI grader that scores student submissions automatically.</p>
+      <p>A TA reviews every AI grade and adjusts it where needed.</p>
+      <p><strong>Question:</strong> can reinforcement learning learn which submissions need adjustment &mdash; and by how much?</p>
+    </div>
+  </section>
+
+  <section class="section" id="data">
+    <h2>The data</h2>
+    <div class="card">
+      <ul>
+        <li><strong>1,520</strong> total student submissions in the updated dataset</li>
+        <li><strong>1,317</strong> used after filtering out question 9 (different scoring scale)</li>
+        <li>Each submission includes: AI score (0&ndash;10), TA final grade (0&ndash;10), question text, response text, AI feedback</li>
+        <li><strong>80/20</strong> train/test split &mdash; <strong>1,054</strong> train / <strong>263</strong> test</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="built">
+    <h2>What I built</h2>
+    <div class="card">
+      <ul>
+        <li>Custom <strong>Gymnasium</strong> environment (<code>GradingAdjustmentEnv</code>)</li>
+        <li><strong>PPO</strong> agent trained for <strong>50,000</strong> timesteps</li>
+        <li><strong>5 discrete actions:</strong> trust AI, +1, +2, +3, or flag for human review</li>
+        <li><strong>State features:</strong> AI score, one-hot question ID, response length, feedback length</li>
+        <li><strong>Reward:</strong> +10 if within 0.5 of true adjustment, +5 within 1.0, &minus;5 if off by 2+ (plus bonus for correct flagging on large adjustments)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="results">
+    <h2>Results</h2>
+    <p class="lead">Mean reward on held-out test submissions (higher is better).</p>
+    <div class="card bar-chart">
+      <div class="bar-row">
+        <span class="bar-label">PPO (prototype)</span>
+        <div class="bar-track"><div class="bar-fill ppo">8.18</div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Regression</span>
+        <div class="bar-track"><div class="bar-fill reg">7.15</div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Always +2</span>
+        <div class="bar-track"><div class="bar-fill p2">2.70</div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Trust AI</span>
+        <div class="bar-track"><div class="bar-fill trust">1.44</div></div>
+      </div>
+      <p class="bar-note"><strong>PPO beats every baseline</strong>, including the regression model trained on AI score alone.</p>
+    </div>
+  </section>
+
+  <section class="section" id="confusion">
+    <h2>What the agent learned</h2>
+    <p class="lead">Predicted action vs. actual TA adjustment bucket (test set, n=263).</p>
+    <div class="card" style="overflow-x: auto;">
+      <table class="confusion">
+        <thead>
+          <tr>
+            <th>Pred \ Actual</th>
+            <th>&le;0</th>
+            <th>(0,1]</th>
+            <th>(1,2]</th>
+            <th>(2,3]</th>
+            <th>&gt;3</th>
+            <th class="sum">Row</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td class="diag">69</td><td>11</td><td>3</td><td>0</td><td>0</td><td class="sum">83</td></tr>
+          <tr><td>1</td><td>4</td><td class="diag">12</td><td>0</td><td>0</td><td>0</td><td class="sum">16</td></tr>
+          <tr><td>2</td><td>7</td><td>10</td><td class="diag">71</td><td>16</td><td>3</td><td class="sum">107</td></tr>
+          <tr><td>3</td><td>0</td><td>0</td><td>0</td><td class="diag">0</td><td>0</td><td class="sum">0</td></tr>
+          <tr><td>flag</td><td>1</td><td>1</td><td>0</td><td>1</td><td class="diag">54</td><td class="sum">57</td></tr>
+          <tr><td><strong>Col</strong></td><td>81</td><td>34</td><td>74</td><td>17</td><td>57</td><td class="sum">263</td></tr>
+        </tbody>
+      </table>
+      <p class="caption">Green cells: intuitive &ldquo;bucket match&rdquo; diagonal (zero / small / medium / large adjustments vs matching action or flag). ~75% accurate at predicting the right adjustment bucket; ~95% correct on big-adjustment flagging (54 of 57 large adjustments flagged).</p>
+    </div>
+  </section>
+
+  <section class="section" id="finding">
+    <h2>Key finding</h2>
+    <div class="callout">
+      <strong>The AI is systematically harsh on complex algorithmic questions</strong>
+      <p class="lead" style="margin-top:0">Knapsack, BFS/DFS, MST / shortest paths &mdash; the TA consistently adds +2 to +3 points back. The agent picked up this pattern without hand-coded rules.</p>
+    </div>
+    <p style="margin-top:1rem;">PPO mean reward by question (test split):</p>
+    <div class="card q-chart">
+      <div class="q-row"><span>Q3 Order</span><div class="q-bar"><i style="width:53%"></i></div><span>5.34</span></div>
+      <div class="q-row"><span>Q4 Non-rec.</span><div class="q-bar"><i style="width:65%"></i></div><span>6.52</span></div>
+      <div class="q-row"><span>Q7 Quicksort</span><div class="q-bar"><i style="width:60%"></i></div><span>6.04</span></div>
+      <div class="q-row"><span>Q8 Heap</span><div class="q-bar"><i style="width:55%"></i></div><span>5.49</span></div>
+      <div class="q-row"><span>Q10 0-1 Knap.</span><div class="q-bar"><i style="width:100%"></i></div><span>10.16</span></div>
+      <div class="q-row"><span>Q11 Frac. Knap.</span><div class="q-bar"><i style="width:100%"></i></div><span>12.09</span></div>
+      <div class="q-row"><span>Q12 BFS/DFS</span><div class="q-bar"><i style="width:99%"></i></div><span>9.96</span></div>
+      <div class="q-row"><span>Q13 MST/SPT</span><div class="q-bar"><i style="width:93%"></i></div><span>9.34</span></div>
+      <div class="q-row"><span>Q5 Subst.</span><div class="q-bar"><i style="width:99%"></i></div><span>10.00</span></div>
+      <div class="q-row"><span>Q6 Master</span><div class="q-bar"><i style="width:83%"></i></div><span>8.33</span></div>
+    </div>
+    <p class="caption">Bar length scaled to max mean reward (12.09). Lower scores on harder open-ended items reflect harder prediction, not necessarily worse TA alignment.</p>
+  </section>
+
+  <section class="section" id="limits">
+    <h2>Limitations</h2>
+    <div class="card">
+      <ul>
+        <li>Small dataset (1,317 examples)</li>
+        <li>Simple feature set &mdash; no rubric criteria, no text embeddings</li>
+        <li>Discrete actions only (no fractional adjustments)</li>
+        <li>Single course, single semester</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="next">
+    <h2>Next steps</h2>
+    <div class="card">
+      <ul>
+        <li>Add rubric-level features</li>
+        <li>Try response embeddings (e.g. sentence-transformers)</li>
+        <li>Finer action space (negative adjustments, half-point bins)</li>
+        <li>Compare against offline RL / behavior cloning</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;opacity:0.7"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      <a href="https://github.com/Jeevith-gowda/rl-grading-adjustment-prototype" target="_blank" rel="noopener">github.com/Jeevith-gowda/rl-grading-adjustment-prototype</a>
+    </p>
+    <p style="margin-top:1rem;">Built by <strong>Jeevith</strong> &middot; May 2026</p>
+  </footer>
+</body>
+</html>

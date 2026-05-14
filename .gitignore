@@ -13,15 +13,19 @@ __pycache__/
 dist/
 build/
 
+# Jupyter
+.ipynb_checkpoints/
+
 # IDE / OS
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
 
-# Course data (not committed — see README)
+# Course data — never commit student submissions or grades exports
 qry6114_2025f_autograding_final.xlsx
 *.xlsx
+*.csv
 
 # TensorBoard / local logs
 runs/
