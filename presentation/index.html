@@ -539,7 +539,7 @@
       <section class="slide is-active" data-slide="0" aria-hidden="false">
         <div class="slide-inner">
           <h1 class="slide-title">RL for Autograding Adjustment</h1>
-          <p class="subtitle">An empirical study on Professor Cheng&rsquo;s algorithm course dataset</p>
+          <p class="subtitle">An study on algorithm course dataset</p>
           <p class="footer-note">ITCS 6114 &middot; Fall 2025 dataset</p>
         </div>
       </section>
@@ -608,17 +608,8 @@
         </div>
       </section>
 
-      <!-- 6 Per-question -->
+      <!-- 6 Approach -->
       <section class="slide" data-slide="5" aria-hidden="true">
-        <div class="slide-inner" style="text-align: center;">
-          <h2 class="slide-heading" style="text-align: left;">Bias varies by question</h2>
-          <img class="slide-img" src="../analysis/03_per_question_boxplot.png" alt="Boxplot of AI minus TA by question" />
-          <p class="caption">Knapsack, BFS/DFS, MST show largest TA adjustments. Simpler items (Q3, Q4) show near-agreement.</p>
-        </div>
-      </section>
-
-      <!-- 7 Approach -->
-      <section class="slide" data-slide="6" aria-hidden="true">
         <div class="slide-inner" style="text-align: center;">
           <h2 class="slide-heading" style="text-align: left;">Frame as a learned correction policy</h2>
           <p style="color: var(--text-muted); margin-bottom: 1rem; text-align: left;">For each submission, predict one of 5 actions:</p>
@@ -633,8 +624,8 @@
         </div>
       </section>
 
-      <!-- 8 Observation space -->
-      <section class="slide" data-slide="7" aria-hidden="true">
+      <!-- 7 Observation space -->
+      <section class="slide" data-slide="6" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">Features the agent sees</h2>
           <p style="color: var(--text-muted); margin-bottom: 0.75rem;">Each submission becomes a 16-dimensional vector:</p>
@@ -650,8 +641,8 @@
         </div>
       </section>
 
-      <!-- 9 Reward -->
-      <section class="slide" data-slide="8" aria-hidden="true">
+      <!-- 8 Reward -->
+      <section class="slide" data-slide="7" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">Reward shaping</h2>
           <p style="color: var(--text-muted); margin-bottom: 0.85rem; font-size: 1rem; line-height: 1.5;">
@@ -664,8 +655,8 @@
         </div>
       </section>
 
-      <!-- 10 Methods -->
-      <section class="slide" data-slide="9" aria-hidden="true">
+      <!-- 9 Methods -->
+      <section class="slide" data-slide="8" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">Six methods compared</h2>
           <table class="data-table">
@@ -684,8 +675,8 @@
         </div>
       </section>
 
-      <!-- 11 Single split -->
-      <section class="slide" data-slide="10" aria-hidden="true">
+      <!-- 10 Single split -->
+      <section class="slide" data-slide="9" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">Initial comparison (single 80/20 split, n=263 test)</h2>
           <div class="chart" id="chart-single"></div>
@@ -693,8 +684,8 @@
         </div>
       </section>
 
-      <!-- 12 CV -->
-      <section class="slide" data-slide="11" aria-hidden="true">
+      <!-- 11 CV -->
+      <section class="slide" data-slide="10" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">5-fold cross-validation tells a different story</h2>
           <table class="data-table cv-table">
@@ -717,8 +708,8 @@
         </div>
       </section>
 
-      <!-- 13 Interpretation -->
-      <section class="slide" data-slide="12" aria-hidden="true">
+      <!-- 12 Interpretation -->
+      <section class="slide" data-slide="11" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">What the result tells us</h2>
           <ol class="interpret-list">
@@ -729,8 +720,8 @@
         </div>
       </section>
 
-      <!-- 14 Forward -->
-      <section class="slide" data-slide="13" aria-hidden="true">
+      <!-- 13 Forward -->
+      <section class="slide" data-slide="12" aria-hidden="true">
         <div class="slide-inner">
           <h2 class="slide-heading">Directions forward</h2>
           <div class="direction-block">
@@ -757,11 +748,11 @@
   <button type="button" class="nav-btn nav-btn--next" id="nextBtn" aria-label="Next slide">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
   </button>
-  <div class="counter" id="counter" aria-live="polite"><span>1</span> / 14</div>
+  <div class="counter" id="counter" aria-live="polite"><span>1</span> / 13</div>
 
   <script>
     (function () {
-      var TOTAL = 14;
+      var TOTAL = 13;
       var current = 0;
 
       var deck = document.getElementById("deck");
