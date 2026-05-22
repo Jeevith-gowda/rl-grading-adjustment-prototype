@@ -1326,5 +1326,5 @@
     406,
     755
   ],
-  "model_file": "rl_grading_agent.zip"
+  "model_file": "ppo_grading_agent.zip"
 }

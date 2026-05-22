@@ -5,27 +5,24 @@ env/
 
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-.Python
-*.egg-info/
-.eggs/
-dist/
-build/
-
-# Jupyter
+*.pyc
+*.pyo
+.pytest_cache/
 .ipynb_checkpoints/
 
-# IDE / OS
-.idea/
-.vscode/
+# OS
 .DS_Store
 Thumbs.db
 
-# Course data — never commit student submissions or grades exports
-qry6114_2025f_autograding_final.xlsx
+# IDE
+.vscode/
+.idea/
+
+# Data (contains student info)
+data/*.xlsx
+data/*.csv
 *.xlsx
 *.csv
 
-# TensorBoard / local logs
-runs/
+# But explicitly keep these:
+!presentation/

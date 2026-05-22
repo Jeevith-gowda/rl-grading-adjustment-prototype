@@ -2,11 +2,11 @@
 Train a PPO agent on GradingAdjustmentEnv to mimic TA score adjustments.
 
 Prerequisites:
-    Place ``qry6114_2025f_autograding_final.xlsx`` in this directory (see README).
+    Place ``qry6114_2025f_autograding_final.xlsx`` in ``data/`` (see README).
 
 Outputs:
-    rl_grading_agent.zip  — saved PPO policy (Stable-Baselines3)
-    grading_meta.json     — train/test indices + word-count caps for evaluate.py
+    models/ppo_grading_agent.zip  — saved PPO policy (Stable-Baselines3)
+    models/grading_meta.json      — train/test indices + word-count caps for evaluate.py
 """
 
 from __future__ import annotations
@@ -22,10 +22,12 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 from grading_env import GradingAdjustmentEnv, compute_norm_maxima, load_grading_frame
 
-ROOT = Path(__file__).resolve().parent
-XLSX = ROOT / "qry6114_2025f_autograding_final.xlsx"
-MODEL_PATH = ROOT / "rl_grading_agent"  # SB3 appends .zip
-META_OUT = ROOT / "grading_meta.json"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+MODELS_DIR = ROOT / "models"
+XLSX = DATA_DIR / "qry6114_2025f_autograding_final.xlsx"
+MODEL_PATH = MODELS_DIR / "ppo_grading_agent"
+META_OUT = MODELS_DIR / "grading_meta.json"
 
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
@@ -43,9 +45,10 @@ def _make_env(df: pd.DataFrame, idx: np.ndarray, max_r: float, max_f: float, see
 
 
 def main() -> None:
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
     if not XLSX.is_file():
         raise FileNotFoundError(
-            f"Missing {XLSX.name}. Copy the course export into this folder (see README)."
+            f"Missing {XLSX}. Copy the course export into data/ (see README)."
         )
 
     df = load_grading_frame(str(XLSX))
@@ -93,7 +96,7 @@ def main() -> None:
         "max_fb_words": max_fb,
         "train_indices": train_idx.astype(int).tolist(),
         "test_indices": test_idx.astype(int).tolist(),
-        "model_file": (MODEL_PATH.name + ".zip"),
+        "model_file": MODEL_PATH.name + ".zip",
     }
     META_OUT.write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"Saved model to {MODEL_PATH}.zip")

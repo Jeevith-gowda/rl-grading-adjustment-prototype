@@ -41,21 +41,51 @@ The agent gets the right adjustment bucket ~75% of the time and correctly flags 
 
 The AI is systematically harsh on harder algorithmic questions — Knapsack, BFS/DFS, MST/Shortest Paths. The TA consistently adds 2-3 points back. The agent picked up on this pattern.
 
-## Files
+## Repository layout
 
-- `grading_env.py` — the RL environment
-- `train_grading_agent.py` — training script
-- `evaluate.py` — comparison vs baselines
-- `results.md` — full results
-- `rl_grading_agent.zip` — the trained model
+```
+rl-grading-adjustment-prototype/
+├── README.md
+├── MANAGER_MANUAL.md
+├── requirements.txt
+├── .gitignore
+│
+├── src/                          ← all Python source files
+│   ├── grading_env.py
+│   ├── train_ppo_agent.py
+│   ├── train_a2c_agent.py
+│   ├── train_random_forest.py
+│   └── evaluate.py
+│
+├── models/                       ← all trained model artifacts
+│   ├── ppo_grading_agent.zip
+│   ├── a2c_grading_agent.zip
+│   ├── random_forest_model.pkl
+│   └── grading_meta.json
+│
+├── results/                      ← all evaluation outputs
+│   └── results.md
+│
+├── presentation/                 ← website
+│   └── index.html
+│
+└── data/                         ← data files (gitignored)
+    └── (qry6114_2025f_autograding_final.xlsx lives here but not committed)
+```
 
 ## How to run
 
 ```bash
+cd rl-grading-adjustment-prototype
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
-# add qry6114_2025f_autograding_final.xlsx to the folder
-python train_grading_agent.py
-python evaluate.py
+
+# Place qry6114_2025f_autograding_final.xlsx in data/
+python src/train_ppo_agent.py
+python src/train_a2c_agent.py
+python src/train_random_forest.py
+python src/evaluate.py
 ```
 
 ## What's missing
