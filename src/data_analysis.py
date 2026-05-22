@@ -119,19 +119,68 @@ def plot_02_histogram(df: pd.DataFrame, out: Path) -> None:
     fig, ax = plt.subplots(figsize=(10, 6))
     diffs = df["score_diff"]
     bins = np.arange(-10, 7, 1)
-    ax.hist(diffs, bins=bins, color="#3b82f6", edgecolor="white", alpha=0.85)
+    counts, _, patches = ax.hist(
+        diffs, bins=bins, color="#3b82f6", edgecolor="white", alpha=0.85
+    )
     ax.axvline(0, color="#dc2626", linestyle="--", linewidth=2, label="Exact agreement")
-    pct_under = pct_underscored(df)
+
+    ymax = float(max(counts)) if len(counts) else 1.0
+    ax.set_ylim(0, ymax * 1.22)
+
+    for patch, count in zip(patches, counts):
+        height = float(count)
+        if height < 5:
+            continue
+        x = patch.get_x() + patch.get_width() / 2.0
+        ax.text(
+            x,
+            height,
+            f"{int(height)}",
+            ha="center",
+            va="bottom",
+            fontsize=11,
+            color="#333333",
+            fontweight="bold",
+        )
+
+    n_total = len(diffs)
+    n_under = int((diffs < 0).sum())
+    n_at_or_above = int((diffs >= 0).sum())
+    pct_under = 100.0 * n_under / n_total if n_total else 0.0
+    pct_above = 100.0 - pct_under
+    label_y = ymax * 1.08
+
+    ax.annotate(
+        f"{pct_under:.0f}% (n={n_under}) underscored",
+        xy=(-5.0, label_y * 0.55),
+        xytext=(-7.5, label_y),
+        fontsize=11,
+        color="#333333",
+        fontweight="bold",
+        ha="center",
+        arrowprops=dict(arrowstyle="-|>", color="#4338ca", lw=1.2),
+    )
+    ax.annotate(
+        f"{pct_above:.0f}% (n={n_at_or_above}) at or above",
+        xy=(2.5, label_y * 0.55),
+        xytext=(4.5, label_y),
+        fontsize=11,
+        color="#333333",
+        fontweight="bold",
+        ha="center",
+        arrowprops=dict(arrowstyle="-|>", color="#4338ca", lw=1.2),
+    )
+
     ax.set_xlabel("AI score − TA grade")
     ax.set_ylabel("Count")
-    ax.set_title(f"Distribution of AI − TA differences (n={len(df)})")
-    ax.legend()
+    ax.set_title(f"Distribution of AI − TA differences (n={n_total})")
+    ax.legend(loc="upper right")
     caption = (
         f"{pct_under:.1f}% of submissions show AI underscoring (TA grade > AI score); "
-        f"{100 - pct_under:.1f}% at or above the diagonal."
+        f"{pct_above:.1f}% at or above the diagonal."
     )
     fig.text(0.5, 0.02, caption, ha="center", fontsize=12, color="#444444", style="italic")
-    fig.tight_layout(rect=[0, 0.06, 1, 1])
+    fig.tight_layout(rect=[0, 0.06, 1, 0.96])
     fig.savefig(out, dpi=150, bbox_inches="tight")
     plt.close(fig)
 
