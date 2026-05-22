@@ -3,410 +3,779 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>RL Grading Adjustment Prototype</title>
+  <title>RL Grading Adjustment — Slide Deck</title>
   <style>
     :root {
-      --bg: #fafaf8;
-      --bg-elevated: #ffffff;
-      --text: #1a1a1a;
-      --text-muted: #5c5c5c;
-      --accent: #0d9488;
-      --accent-soft: rgba(13, 148, 136, 0.12);
-      --accent-blue: #2563eb;
-      --border: #e8e6e3;
-      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
-      --radius: 14px;
-      --maxw: 720px;
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --bg: #0f172a;
+      --bg-slide: #111827;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #06b6d4;
+      --accent-soft: rgba(6, 182, 212, 0.15);
+      --accent-glow: rgba(6, 182, 212, 0.35);
+      --border: rgba(148, 163, 184, 0.2);
+      --nav-size: 3.25rem;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --transition-ms: 500ms;
     }
-    *, *::before, *::after { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .section { animation: none !important; opacity: 1 !important; transform: none !important; }
-    }
-    body {
-      margin: 0;
-      font-family: var(--font);
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, "Segoe UI", Inter, "SF Pro Display", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.55;
-      font-size: 1.05rem;
+      -webkit-font-smoothing: antialiased;
     }
-    /* Scroll-driven section reveal (Chrome 115+); graceful fallback */
-    .section {
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 4rem 1.5rem;
-      opacity: 1;
-      transform: none;
+
+    .viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
     }
-    @supports (animation-timeline: view()) {
-      @media (prefers-reduced-motion: no-preference) {
-        .section {
-          opacity: 0;
-          transform: translateY(16px);
-          animation: section-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-          animation-timeline: view();
-          animation-range: entry 0% cover 28%;
-        }
-      }
+
+    .deck {
+      display: flex;
+      height: 100%;
+      will-change: transform;
+      transition: transform var(--transition-ms) var(--ease);
     }
-    @keyframes section-in {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .hero {
-      min-height: 88vh;
+
+    .slide {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
-      padding: 3rem 1.5rem 4rem;
-      background: linear-gradient(165deg, #fffef9 0%, #f0fdfa 45%, var(--bg) 100%);
-      border-bottom: 1px solid var(--border);
+      padding: clamp(2rem, 6vw, 5rem) clamp(4.5rem, 10vw, 7rem);
+      background: var(--bg-slide);
+      position: relative;
+      overflow: hidden;
     }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-soft);
-      padding: 0.35rem 0.85rem;
-      border-radius: 999px;
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6, 182, 212, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .slide-inner {
+      position: relative;
+      z-index: 1;
+      width: min(920px, 100%);
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.6s var(--ease) 0.15s, transform 0.6s var(--ease) 0.15s;
+    }
+
+    .slide.is-active .slide-inner {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Title slide */
+    .slide--title {
+      background: linear-gradient(145deg, #0f172a 0%, #1e293b 40%, #0f172a 100%);
+    }
+    .slide--title::before {
+      background: radial-gradient(ellipse 70% 50% at 30% 20%, rgba(6, 182, 212, 0.2), transparent 60%),
+                  radial-gradient(ellipse 50% 40% at 80% 80%, rgba(99, 102, 241, 0.12), transparent 55%);
+    }
+    .title-main {
+      font-size: clamp(2.75rem, 8vw, 4.75rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
       margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    h1 {
-      font-size: clamp(1.85rem, 5vw, 2.65rem);
+    .title-sub {
+      font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+      color: var(--text-muted);
+      font-weight: 400;
+      line-height: 1.5;
+      max-width: 28ch;
+    }
+    .title-meta {
+      margin-top: 4rem;
+      font-size: 0.9rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Typography helpers */
+    .headline {
+      font-size: clamp(2rem, 5.5vw, 3.25rem);
       font-weight: 700;
       letter-spacing: -0.03em;
       line-height: 1.15;
-      margin: 0 0 0.75rem;
-      max-width: 18ch;
+      text-align: center;
     }
-    .hero-sub {
-      font-size: 1.15rem;
+    .subhead {
+      font-size: clamp(1rem, 2.2vw, 1.35rem);
       color: var(--text-muted);
-      max-width: 36ch;
-      margin: 0 0 1.5rem;
+      text-align: center;
+      margin-top: 1.25rem;
+      line-height: 1.55;
+      max-width: 42ch;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .hero-meta {
-      font-size: 0.95rem;
-      color: var(--text-muted);
+    .slide-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
     }
-    h2 {
-      font-size: 1.35rem;
+    .slide-h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
       font-weight: 650;
       letter-spacing: -0.02em;
-      margin: 0 0 1.25rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--accent);
-      display: inline-block;
+      margin-bottom: 2rem;
+      text-align: center;
     }
-    .card {
-      background: var(--bg-elevated);
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr; gap: 1rem; }
+    }
+    .stat {
+      text-align: center;
+      padding: 1.75rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem 1.35rem;
-      box-shadow: var(--shadow);
-      margin-top: 1rem;
+      border-radius: 16px;
     }
-    ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
-    li { margin: 0.45rem 0; }
-    p { margin: 0.75rem 0 0; color: var(--text-muted); }
-    p.lead { color: var(--text); font-size: 1.05rem; }
-    .bar-chart {
-      margin-top: 1.5rem;
+    .stat-num {
+      font-size: clamp(2.5rem, 6vw, 3.75rem);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1;
     }
-    .bar-row {
+    .stat-label {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Action pills */
+    .pills {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       gap: 0.75rem;
-      margin-bottom: 0.85rem;
+      justify-content: center;
+      margin-bottom: 2rem;
     }
-    .bar-label {
-      flex: 0 0 140px;
-      font-size: 0.88rem;
+    .pill {
+      padding: 0.65rem 1.25rem;
+      background: var(--accent-soft);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      border-radius: 999px;
+      font-size: 0.95rem;
       font-weight: 500;
       color: var(--text);
-      text-align: right;
+    }
+    .pill--flag {
+      border-color: rgba(251, 146, 60, 0.5);
+      background: rgba(251, 146, 60, 0.12);
+    }
+
+    /* Bar charts */
+    .chart { width: 100%; }
+    .chart-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 160px) 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
     }
     @media (max-width: 520px) {
-      .bar-label { flex: 0 0 100px; font-size: 0.78rem; }
+      .chart-row { grid-template-columns: 100px 1fr auto; gap: 0.5rem; }
     }
-    .bar-track {
-      flex: 1;
-      height: 36px;
-      background: #eee;
-      border-radius: 8px;
+    .chart-label {
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-align: right;
+      color: var(--text-muted);
+    }
+    .chart-label.winner { color: var(--text); font-weight: 600; }
+    .chart-label .tag {
+      display: inline-block;
+      margin-left: 0.35rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      vertical-align: middle;
+    }
+    .chart-track {
+      height: 40px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
       overflow: hidden;
-      position: relative;
     }
-    .bar-fill {
+    .chart-fill {
       height: 100%;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      padding-right: 0.65rem;
+      padding-right: 0.75rem;
       font-size: 0.85rem;
+      font-weight: 700;
+      min-width: 3rem;
+      transition: width 0.9s var(--ease) 0.3s;
+    }
+    .slide.is-active .chart-fill { /* widths set inline */ }
+    .chart-fill--ppo {
+      background: linear-gradient(90deg, #0891b2, var(--accent));
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+    .chart-fill--rf { background: linear-gradient(90deg, #b45309, #f59e0b); color: #0f172a; }
+    .chart-fill--a2c { background: linear-gradient(90deg, #6d28d9, #a78bfa); }
+    .chart-fill--reg { background: #475569; }
+    .chart-fill--p2 { background: #64748b; }
+    .chart-fill--trust { background: #334155; color: #94a3b8; }
+    .chart-val {
+      font-size: 0.95rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text);
       min-width: 2.5rem;
-      transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+      text-align: right;
     }
-    .bar-fill.ppo {
-      width: 81.8%;
-      background: linear-gradient(90deg, var(--accent), #14b8a6);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+
+    /* Comparison slide emphasis */
+    .slide--comparison {
+      background: linear-gradient(160deg, #0f172a 0%, #164e63 120%);
     }
-    .bar-fill.reg { width: 71.5%; background: #64748b; }
-    .bar-fill.p2 { width: 27%; background: #94a3b8; }
-    .bar-fill.trust { width: 14.4%; background: #cbd5e1; color: #334155; }
-    .bar-note {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      margin-top: 1rem;
-      padding: 0.85rem 1rem;
-      background: var(--accent-soft);
-      border-radius: 10px;
-      border-left: 4px solid var(--accent);
+    .slide--comparison .slide-h2 {
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      margin-bottom: 1.75rem;
     }
-    table.confusion {
+
+    /* Finding slide */
+    .slide--finding .headline { max-width: 20ch; margin: 0 auto; }
+    .highlight-num { color: var(--accent); }
+
+    /* Confusion table */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 0.5rem;
+    }
+    table.conf {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.88rem;
-      margin-top: 1rem;
+      font-size: clamp(0.75rem, 1.8vw, 0.9rem);
     }
-    table.confusion th, table.confusion td {
+    table.conf th, table.conf td {
       border: 1px solid var(--border);
-      padding: 0.55rem 0.45rem;
+      padding: 0.55rem 0.4rem;
       text-align: center;
     }
-    table.confusion th {
-      background: #f4f4f2;
+    table.conf th {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
-    table.confusion td:first-child {
-      font-weight: 600;
-      background: #fafafa;
+    table.conf td:first-child {
       text-align: left;
-      padding-left: 0.65rem;
-    }
-    table.confusion .diag {
-      background: rgba(16, 185, 129, 0.28) !important;
-      font-weight: 700;
-    }
-    table.confusion .sum {
-      background: #f0fdf4;
       font-weight: 600;
+      padding-left: 0.65rem;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    table.conf td.diag {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.4);
+    }
+    table.conf td.sum {
+      background: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+      color: var(--text-muted);
     }
     .caption {
       font-size: 0.88rem;
       color: var(--text-muted);
-      margin-top: 0.75rem;
+      text-align: center;
+      margin-top: 1.25rem;
       font-style: italic;
+      line-height: 1.5;
     }
-    .callout {
-      background: linear-gradient(135deg, #ecfdf5 0%, #fff 50%);
-      border: 1px solid rgba(13, 148, 136, 0.35);
-      border-radius: var(--radius);
-      padding: 1.75rem 1.5rem;
-      margin-top: 1rem;
-      box-shadow: var(--shadow);
-    }
-    .callout strong { color: var(--accent); font-size: 1.15rem; display: block; margin-bottom: 0.5rem; }
-    .q-chart { margin-top: 1.25rem; }
+
+    /* Per-question */
     .q-row {
       display: grid;
-      grid-template-columns: minmax(100px, 1fr) 4fr auto;
-      gap: 0.5rem 0.75rem;
+      grid-template-columns: minmax(90px, 130px) 1fr 3rem;
+      gap: 0.65rem 1rem;
       align-items: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
       font-size: 0.82rem;
     }
-    .q-row span:first-child { color: var(--text-muted); }
+    .q-row span:first-child { color: var(--text-muted); text-align: right; }
     .q-bar {
-      height: 10px;
-      background: #e5e5e5;
-      border-radius: 5px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
       overflow: hidden;
     }
-    .q-bar > i {
+    .q-bar i {
       display: block;
       height: 100%;
-      border-radius: 5px;
-      background: linear-gradient(90deg, var(--accent-blue), #60a5fa);
+      border-radius: 6px;
+      background: linear-gradient(90deg, #0891b2, var(--accent));
+      transition: width 0.9s var(--ease) 0.25s;
     }
-    footer {
-      text-align: center;
-      padding: 3rem 1.5rem;
-      background: #f4f4f2;
-      border-top: 1px solid var(--border);
-      font-size: 0.92rem;
+    .q-val { font-weight: 600; color: var(--text); text-align: right; }
+
+    /* Limitations & next */
+    .bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .bullets li {
+      font-size: clamp(1.15rem, 2.8vw, 1.5rem);
+      padding-left: 1.75rem;
+      position: relative;
+      line-height: 1.4;
       color: var(--text-muted);
     }
-    footer a { color: var(--accent-blue); text-decoration: none; font-weight: 500; }
-    footer a:hover { text-decoration: underline; }
-    .icon { vertical-align: middle; margin-right: 0.25rem; }
+    .bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .numbered {
+      list-style: none;
+      counter-reset: steps;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+    .numbered li {
+      counter-increment: steps;
+      font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+      padding-left: 3.5rem;
+      position: relative;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+    .numbered li::before {
+      content: counter(steps);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Closing */
+    .slide--close .headline { font-size: clamp(3rem, 10vw, 5rem); }
+    .close-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--accent);
+      font-size: 1.05rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .close-link:hover { text-decoration: underline; }
+    .close-meta {
+      margin-top: 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Navigation */
+    .nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      width: var(--nav-size);
+      height: var(--nav-size);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s, opacity 0.2s, transform 0.2s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      transform: translateY(-50%) scale(1.05);
+    }
+    .nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+    .nav-btn--prev { left: 1.25rem; }
+    .nav-btn--next { right: 1.25rem; }
+    .nav-btn svg { width: 1.35rem; height: 1.35rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .counter {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    .counter span { color: var(--accent); }
+
+    @media (max-width: 480px) {
+      .nav-btn { width: 2.75rem; height: 2.75rem; }
+      .nav-btn--prev { left: 0.5rem; }
+      .nav-btn--next { right: 0.5rem; }
+      .slide { padding-left: 3.5rem; padding-right: 3.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .deck, .slide-inner, .chart-fill, .q-bar i { transition: none !important; }
+      .slide-inner { opacity: 1; transform: none; }
+    }
   </style>
 </head>
 <body>
+  <div class="viewport" id="viewport">
+    <div class="deck" id="deck" role="region" aria-label="Presentation slides">
 
-  <header class="hero">
-    <div class="hero-badge">
-      <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      Prototype
-    </div>
-    <h1>RL Grading Adjustment Prototype</h1>
-    <p class="hero-sub">Predicting TA grade adjustments on AI-graded student submissions</p>
-    <p class="hero-meta">Built on Professor Cheng&rsquo;s autograding dataset</p>
-  </header>
+      <!-- 1 Title -->
+      <section class="slide slide--title is-active" data-slide="0" aria-hidden="false">
+        <div class="slide-inner" style="text-align: center; width: 100%;">
+          <h1 class="title-main">RL Grading Adjustment</h1>
+          <p class="title-sub" style="margin: 0 auto;">Comparing six methods on Professor Cheng&rsquo;s autograding dataset</p>
+          <p class="title-meta">Built in 3 days &middot; Updated for second meeting</p>
+        </div>
+      </section>
 
-  <section class="section" id="problem">
-    <h2>The problem</h2>
-    <div class="card">
-      <p class="lead">Professor Cheng has an AI grader that scores student submissions automatically.</p>
-      <p>A TA reviews every AI grade and adjusts it where needed.</p>
-      <p><strong>Question:</strong> can reinforcement learning learn which submissions need adjustment &mdash; and by how much?</p>
-    </div>
-  </section>
+      <!-- 2 Problem -->
+      <section class="slide" data-slide="1" aria-hidden="true">
+        <div class="slide-inner" style="text-align: center;">
+          <p class="headline">The AI grader is too harsh.</p>
+          <p class="subhead">81% of submissions need adjustment from the TA.</p>
+        </div>
+      </section>
 
-  <section class="section" id="data">
-    <h2>The data</h2>
-    <div class="card">
-      <ul>
-        <li><strong>1,520</strong> total student submissions in the updated dataset</li>
-        <li><strong>1,317</strong> used after filtering out question 9 (different scoring scale)</li>
-        <li>Each submission includes: AI score (0&ndash;10), TA final grade (0&ndash;10), question text, response text, AI feedback</li>
-        <li><strong>80/20</strong> train/test split &mdash; <strong>1,054</strong> train / <strong>263</strong> test</li>
-      </ul>
-    </div>
-  </section>
+      <!-- 3 Data -->
+      <section class="slide" data-slide="2" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-label">The data</p>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-num">1,317</div>
+              <div class="stat-label">submissions</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">107</div>
+              <div class="stat-label">students</div>
+            </div>
+            <div class="stat">
+              <div class="stat-num">13</div>
+              <div class="stat-label">questions</div>
+            </div>
+          </div>
+          <p class="subhead" style="margin-top: 0;">Excluded question 9 (different scoring scale). 80/20 train/test split.</p>
+        </div>
+      </section>
 
-  <section class="section" id="built">
-    <h2>What I built</h2>
-    <div class="card">
-      <ul>
-        <li>Custom <strong>Gymnasium</strong> environment (<code>GradingAdjustmentEnv</code>)</li>
-        <li><strong>PPO</strong> agent trained for <strong>50,000</strong> timesteps</li>
-        <li><strong>5 discrete actions:</strong> trust AI, +1, +2, +3, or flag for human review</li>
-        <li><strong>State features:</strong> AI score, one-hot question ID, response length, feedback length</li>
-        <li><strong>Reward:</strong> +10 if within 0.5 of true adjustment, +5 within 1.0, &minus;5 if off by 2+ (plus bonus for correct flagging on large adjustments)</li>
-      </ul>
-    </div>
-  </section>
+      <!-- 4 Approach -->
+      <section class="slide" data-slide="3" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-h2">Predict what the TA would do</p>
+          <div class="pills">
+            <span class="pill">Trust AI</span>
+            <span class="pill">+1 point</span>
+            <span class="pill">+2 points</span>
+            <span class="pill">+3 points</span>
+            <span class="pill pill--flag">Flag for review</span>
+          </div>
+          <p class="subhead" style="margin-top: 0;">16 features per submission: AI score, question type, response length, feedback length.</p>
+        </div>
+      </section>
 
-  <section class="section" id="results">
-    <h2>Results</h2>
-    <p class="lead">Mean reward on held-out test submissions (higher is better).</p>
-    <div class="card bar-chart">
-      <div class="bar-row">
-        <span class="bar-label">PPO (prototype)</span>
-        <div class="bar-track"><div class="bar-fill ppo">8.18</div></div>
-      </div>
-      <div class="bar-row">
-        <span class="bar-label">Regression</span>
-        <div class="bar-track"><div class="bar-fill reg">7.15</div></div>
-      </div>
-      <div class="bar-row">
-        <span class="bar-label">Always +2</span>
-        <div class="bar-track"><div class="bar-fill p2">2.70</div></div>
-      </div>
-      <div class="bar-row">
-        <span class="bar-label">Trust AI</span>
-        <div class="bar-track"><div class="bar-fill trust">1.44</div></div>
-      </div>
-      <p class="bar-note"><strong>PPO beats every baseline</strong>, including the regression model trained on AI score alone.</p>
-    </div>
-  </section>
+      <!-- 5 Comparison -->
+      <section class="slide slide--comparison" data-slide="4" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-h2">Mean reward on test set (higher = better)</p>
+          <div class="chart" role="img" aria-label="Bar chart comparing six methods">
+            <div class="chart-row">
+              <span class="chart-label winner">PPO <span class="tag">winner</span></span>
+              <div class="chart-track"><div class="chart-fill chart-fill--ppo" style="width: 0%" data-width="81.8%">8.18</div></div>
+              <span class="chart-val">8.18</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">Random Forest</span>
+              <div class="chart-track"><div class="chart-fill chart-fill--rf" style="width: 0%" data-width="81%">8.10</div></div>
+              <span class="chart-val">8.10</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">A2C</span>
+              <div class="chart-track"><div class="chart-fill chart-fill--a2c" style="width: 0%" data-width="79.5%">7.95</div></div>
+              <span class="chart-val">7.95</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">OLS Regression</span>
+              <div class="chart-track"><div class="chart-fill chart-fill--reg" style="width: 0%" data-width="71.5%">7.15</div></div>
+              <span class="chart-val">7.15</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">Always +2</span>
+              <div class="chart-track"><div class="chart-fill chart-fill--p2" style="width: 0%" data-width="27%">2.70</div></div>
+              <span class="chart-val">2.70</span>
+            </div>
+            <div class="chart-row">
+              <span class="chart-label">Always trust AI</span>
+              <div class="chart-track"><div class="chart-fill chart-fill--trust" style="width: 0%" data-width="14.4%">1.44</div></div>
+              <span class="chart-val">1.44</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <section class="section" id="confusion">
-    <h2>What the agent learned</h2>
-    <p class="lead">Predicted action vs. actual TA adjustment bucket (test set, n=263).</p>
-    <div class="card" style="overflow-x: auto;">
-      <table class="confusion">
-        <thead>
-          <tr>
-            <th>Pred \ Actual</th>
-            <th>&le;0</th>
-            <th>(0,1]</th>
-            <th>(1,2]</th>
-            <th>(2,3]</th>
-            <th>&gt;3</th>
-            <th class="sum">Row</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>0</td><td class="diag">69</td><td>11</td><td>3</td><td>0</td><td>0</td><td class="sum">83</td></tr>
-          <tr><td>1</td><td>4</td><td class="diag">12</td><td>0</td><td>0</td><td>0</td><td class="sum">16</td></tr>
-          <tr><td>2</td><td>7</td><td>10</td><td class="diag">71</td><td>16</td><td>3</td><td class="sum">107</td></tr>
-          <tr><td>3</td><td>0</td><td>0</td><td>0</td><td class="diag">0</td><td>0</td><td class="sum">0</td></tr>
-          <tr><td>flag</td><td>1</td><td>1</td><td>0</td><td>1</td><td class="diag">54</td><td class="sum">57</td></tr>
-          <tr><td><strong>Col</strong></td><td>81</td><td>34</td><td>74</td><td>17</td><td>57</td><td class="sum">263</td></tr>
-        </tbody>
-      </table>
-      <p class="caption">Green cells: intuitive &ldquo;bucket match&rdquo; diagonal (zero / small / medium / large adjustments vs matching action or flag). ~75% accurate at predicting the right adjustment bucket; ~95% correct on big-adjustment flagging (54 of 57 large adjustments flagged).</p>
-    </div>
-  </section>
+      <!-- 6 Honest finding -->
+      <section class="slide slide--finding" data-slide="5" aria-hidden="true">
+        <div class="slide-inner" style="text-align: center;">
+          <p class="headline">PPO wins &mdash; but only by <span class="highlight-num">0.08</span> points over Random Forest.</p>
+          <p class="subhead">On tabular data with one-step decisions, RL barely beats a good classifier. The win comes from the flag action and reward shaping.</p>
+        </div>
+      </section>
 
-  <section class="section" id="finding">
-    <h2>Key finding</h2>
-    <div class="callout">
-      <strong>The AI is systematically harsh on complex algorithmic questions</strong>
-      <p class="lead" style="margin-top:0">Knapsack, BFS/DFS, MST / shortest paths &mdash; the TA consistently adds +2 to +3 points back. The agent picked up this pattern without hand-coded rules.</p>
-    </div>
-    <p style="margin-top:1rem;">PPO mean reward by question (test split):</p>
-    <div class="card q-chart">
-      <div class="q-row"><span>Q3 Order</span><div class="q-bar"><i style="width:53%"></i></div><span>5.34</span></div>
-      <div class="q-row"><span>Q4 Non-rec.</span><div class="q-bar"><i style="width:65%"></i></div><span>6.52</span></div>
-      <div class="q-row"><span>Q7 Quicksort</span><div class="q-bar"><i style="width:60%"></i></div><span>6.04</span></div>
-      <div class="q-row"><span>Q8 Heap</span><div class="q-bar"><i style="width:55%"></i></div><span>5.49</span></div>
-      <div class="q-row"><span>Q10 0-1 Knap.</span><div class="q-bar"><i style="width:100%"></i></div><span>10.16</span></div>
-      <div class="q-row"><span>Q11 Frac. Knap.</span><div class="q-bar"><i style="width:100%"></i></div><span>12.09</span></div>
-      <div class="q-row"><span>Q12 BFS/DFS</span><div class="q-bar"><i style="width:99%"></i></div><span>9.96</span></div>
-      <div class="q-row"><span>Q13 MST/SPT</span><div class="q-bar"><i style="width:93%"></i></div><span>9.34</span></div>
-      <div class="q-row"><span>Q5 Subst.</span><div class="q-bar"><i style="width:99%"></i></div><span>10.00</span></div>
-      <div class="q-row"><span>Q6 Master</span><div class="q-bar"><i style="width:83%"></i></div><span>8.33</span></div>
-    </div>
-    <p class="caption">Bar length scaled to max mean reward (12.09). Lower scores on harder open-ended items reflect harder prediction, not necessarily worse TA alignment.</p>
-  </section>
+      <!-- 7 Confusion -->
+      <section class="slide" data-slide="6" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-label">What PPO learned</p>
+          <div class="table-wrap">
+            <table class="conf">
+              <thead>
+                <tr>
+                  <th>Pred \ Actual</th>
+                  <th>&le;0</th>
+                  <th>(0,1]</th>
+                  <th>(1,2]</th>
+                  <th>(2,3]</th>
+                  <th>&gt;3</th>
+                  <th>Row</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>0</td><td class="diag">69</td><td>11</td><td>3</td><td>0</td><td>0</td><td class="sum">83</td></tr>
+                <tr><td>1</td><td>4</td><td class="diag">12</td><td>0</td><td>0</td><td>0</td><td class="sum">16</td></tr>
+                <tr><td>2</td><td>7</td><td>10</td><td class="diag">71</td><td>16</td><td>3</td><td class="sum">107</td></tr>
+                <tr><td>3</td><td>0</td><td>0</td><td>0</td><td class="diag">0</td><td>0</td><td class="sum">0</td></tr>
+                <tr><td>flag</td><td>1</td><td>1</td><td>0</td><td>1</td><td class="diag">54</td><td class="sum">57</td></tr>
+                <tr><td><strong>Col</strong></td><td class="sum">81</td><td class="sum">34</td><td class="sum">74</td><td class="sum">17</td><td class="sum">57</td><td class="sum">263</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="caption">~78% bucket accuracy. 95% precision on flagging large adjustments (54 of 57).</p>
+        </div>
+      </section>
 
-  <section class="section" id="limits">
-    <h2>Limitations</h2>
-    <div class="card">
-      <ul>
-        <li>Small dataset (1,317 examples)</li>
-        <li>Simple feature set &mdash; no rubric criteria, no text embeddings</li>
-        <li>Discrete actions only (no fractional adjustments)</li>
-        <li>Single course, single semester</li>
-      </ul>
-    </div>
-  </section>
+      <!-- 8 Per-question -->
+      <section class="slide" data-slide="7" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-label">PPO per question (test split)</p>
+          <div class="chart q-chart">
+            <div class="q-row"><span>Q11 Frac. Knap.</span><div class="q-bar"><i data-width="100%"></i></div><span class="q-val">12.09</span></div>
+            <div class="q-row"><span>Q10 0-1 Knap.</span><div class="q-bar"><i data-width="84%"></i></div><span class="q-val">10.16</span></div>
+            <div class="q-row"><span>Q5 Subst.</span><div class="q-bar"><i data-width="83%"></i></div><span class="q-val">10.00</span></div>
+            <div class="q-row"><span>Q12 BFS/DFS</span><div class="q-bar"><i data-width="82%"></i></div><span class="q-val">9.96</span></div>
+            <div class="q-row"><span>Q13 MST/SPT</span><div class="q-bar"><i data-width="77%"></i></div><span class="q-val">9.34</span></div>
+            <div class="q-row"><span>Q6 Master</span><div class="q-bar"><i data-width="69%"></i></div><span class="q-val">8.33</span></div>
+            <div class="q-row"><span>Q4 Non-rec.</span><div class="q-bar"><i data-width="54%"></i></div><span class="q-val">6.52</span></div>
+            <div class="q-row"><span>Q7 Quicksort</span><div class="q-bar"><i data-width="50%"></i></div><span class="q-val">6.04</span></div>
+            <div class="q-row"><span>Q3 Order</span><div class="q-bar"><i data-width="44%"></i></div><span class="q-val">5.34</span></div>
+            <div class="q-row"><span>Q8 Heap</span><div class="q-bar"><i data-width="45%"></i></div><span class="q-val">5.49</span></div>
+          </div>
+          <p class="caption">Best on Knapsack, BFS/DFS, MST. Worst on simpler questions with variable TA behavior.</p>
+        </div>
+      </section>
 
-  <section class="section" id="next">
-    <h2>Next steps</h2>
-    <div class="card">
-      <ul>
-        <li>Add rubric-level features</li>
-        <li>Try response embeddings (e.g. sentence-transformers)</li>
-        <li>Finer action space (negative adjustments, half-point bins)</li>
-        <li>Compare against offline RL / behavior cloning</li>
-      </ul>
-    </div>
-  </section>
+      <!-- 9 Limitations -->
+      <section class="slide" data-slide="8" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-h2">What this isn&rsquo;t</p>
+          <ul class="bullets">
+            <li>Small dataset (1,317 examples)</li>
+            <li>No text embeddings</li>
+            <li>Discrete actions only</li>
+            <li>Single course, single semester</li>
+          </ul>
+        </div>
+      </section>
 
-  <footer>
-    <p>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;opacity:0.7"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-      <a href="https://github.com/Jeevith-gowda/rl-grading-adjustment-prototype" target="_blank" rel="noopener">github.com/Jeevith-gowda/rl-grading-adjustment-prototype</a>
-    </p>
-    <p style="margin-top:1rem;">Built by <strong>Jeevith</strong> &middot; May 2026</p>
-  </footer>
+      <!-- 10 Next steps -->
+      <section class="slide" data-slide="9" aria-hidden="true">
+        <div class="slide-inner">
+          <p class="slide-h2">Where I&rsquo;d go next</p>
+          <ol class="numbered">
+            <li>Add text embeddings of student response and AI feedback</li>
+            <li>Expand action space (negative adjustments, half-points)</li>
+            <li>Try sequential framing (track student progress over time)</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 11 Closing -->
+      <section class="slide slide--close" data-slide="10" aria-hidden="true">
+        <div class="slide-inner" style="text-align: center;">
+          <p class="headline">Questions?</p>
+          <a class="close-link" href="https://github.com/Jeevith-gowda/rl-grading-adjustment-prototype" target="_blank" rel="noopener">github.com/Jeevith-gowda/rl-grading-adjustment-prototype</a>
+          <p class="close-meta">Jeevith &middot; May 2026</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <button type="button" class="nav-btn nav-btn--prev" id="prevBtn" aria-label="Previous slide" disabled>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button type="button" class="nav-btn nav-btn--next" id="nextBtn" aria-label="Next slide">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <div class="counter" id="counter" aria-live="polite"><span>1</span> / 11</div>
+
+  <script>
+    (function () {
+      const TOTAL = 11;
+      let current = 0;
+
+      const deck = document.getElementById("deck");
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const counterEl = document.getElementById("counter");
+
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const SWIPE_THRESHOLD = 50;
+
+      function animateBars(slideEl) {
+        if (!slideEl) return;
+        slideEl.querySelectorAll("[data-width]").forEach(function (el) {
+          var w = el.getAttribute("data-width");
+          if (w) el.style.width = w;
+        });
+      }
+
+      function resetBars(slideEl) {
+        if (!slideEl) return;
+        slideEl.querySelectorAll(".chart-fill, .q-bar i[data-width]").forEach(function (el) {
+          el.style.width = "0%";
+        });
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= TOTAL || index === current) return;
+
+        var prevSlide = slides[current];
+        resetBars(prevSlide);
+        prevSlide.classList.remove("is-active");
+        prevSlide.setAttribute("aria-hidden", "true");
+
+        current = index;
+
+        var nextSlide = slides[current];
+        nextSlide.classList.add("is-active");
+        nextSlide.setAttribute("aria-hidden", "false");
+
+        deck.style.transform = "translateX(-" + current * 100 + "vw)";
+
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = current === TOTAL - 1;
+        counterEl.innerHTML = "<span>" + (current + 1) + "</span> / " + TOTAL;
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            animateBars(nextSlide);
+          });
+        });
+      }
+
+      function next() { goTo(current + 1); }
+      function prev() { goTo(current - 1); }
+
+      prevBtn.addEventListener("click", prev);
+      nextBtn.addEventListener("click", next);
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === " ") {
+          e.preventDefault();
+          next();
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          prev();
+        }
+      });
+
+      var viewport = document.getElementById("viewport");
+      viewport.addEventListener("touchstart", function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      viewport.addEventListener("touchend", function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        var diff = touchStartX - touchEndX;
+        if (Math.abs(diff) < SWIPE_THRESHOLD) return;
+        if (diff > 0) next();
+        else prev();
+      }, { passive: true });
+
+      animateBars(slides[0]);
+    })();
+  </script>
 </body>
 </html>
