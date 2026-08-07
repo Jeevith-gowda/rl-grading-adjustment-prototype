@@ -26,3 +26,5 @@ data/*.csv
 
 # But explicitly keep these:
 !presentation/
+.env
+.env.local
